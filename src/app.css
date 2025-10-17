@@ -1,0 +1,388 @@
+:root {
+  --primary-color: #1a1a1a;
+  --secondary-color: #ffffff;
+  --accent-color: #ff6b35;
+  --text-color: #333333;
+  --border-color: #e0e0e0;
+  --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  height: 100vh;
+  width: 100vw;
+  max-width: 390px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-color: var(--secondary-color);
+}
+
+/* Header Styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: var(--secondary-color);
+  border-bottom: 1px solid var(--border-color);
+  min-height: 80px;
+}
+
+.reset-button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow);
+}
+
+.reset-button:active {
+  transform: scale(0.95);
+  background-color: #e55a2b;
+}
+
+.counters {
+  display: flex;
+  gap: 30px;
+}
+
+.counter {
+  text-align: center;
+}
+
+.counter-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 4px;
+}
+
+.counter-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* Cricket Ball Button */
+.cricket-ball-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.cricket-ball {
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.1s ease;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.cricket-ball:active {
+  transform: scale(0.95);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.cricket-ball-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+/* Undo Slider */
+.undo-container {
+  padding: 20px;
+  background-color: var(--secondary-color);
+  border-top: 1px solid var(--border-color);
+}
+
+.undo-slider {
+  position: relative;
+  height: 70px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 35px;
+  border: 3px solid #dee2e6;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.undo-slider:active {
+  transform: scale(0.98);
+}
+
+.undo-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b35 0%, #ff8a65 50%, #ff6b35 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 32px;
+}
+
+.undo-track.active {
+  opacity: 0.8;
+  animation: pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+.undo-handle {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 58px;
+  height: 58px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 3px solid var(--accent-color);
+  border-radius: 50%;
+  cursor: grab;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.undo-handle:active {
+  cursor: grabbing;
+}
+
+.undo-handle.dragging {
+  transform: scale(1.15);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.undo-handle-icon {
+  font-size: 28px;
+  color: var(--accent-color);
+  font-weight: bold;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1;
+  z-index: 2;
+  position: relative;
+}
+
+.undo-progress-ring {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--accent-color) 0deg,
+    var(--accent-color) calc(var(--progress) * 3.6deg),
+    transparent calc(var(--progress) * 3.6deg),
+    transparent 360deg
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.undo-progress-ring.active {
+  opacity: 1;
+  animation: spin-progress 2s linear infinite;
+}
+
+@keyframes spin-progress {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.undo-label {
+  position: absolute;
+  left: 25px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-color);
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: var(--secondary-color);
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 300px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+  color: var(--primary-color);
+}
+
+.modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-button {
+  padding: 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-button.primary {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.modal-button.secondary {
+  background-color: #f0f0f0;
+  color: var(--text-color);
+}
+
+.modal-button:active {
+  transform: scale(0.98);
+}
+
+/* Responsive adjustments for iPhone 14 */
+@media (max-width: 390px) {
+  .cricket-ball {
+    width: 250px;
+    height: 250px;
+  }
+  
+  .undo-slider {
+    height: 65px;
+  }
+  
+  .undo-handle {
+    width: 53px;
+    height: 53px;
+  }
+  
+  .undo-handle-icon {
+    font-size: 24px;
+  }
+  
+  .undo-progress-ring {
+    width: 59px;
+    height: 59px;
+    top: -3px;
+    left: -3px;
+  }
+  
+  .undo-label {
+    font-size: 16px;
+    left: 22px;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+  .header {
+    padding: 10px 20px;
+    min-height: 60px;
+  }
+  
+  .cricket-ball-container {
+    padding: 20px;
+  }
+  
+  .cricket-ball {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .undo-container {
+    padding: 10px 20px;
+  }
+  
+  .undo-slider {
+    height: 60px;
+  }
+  
+  .undo-handle {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .undo-handle-icon {
+    font-size: 20px;
+  }
+  
+  .undo-progress-ring {
+    width: 54px;
+    height: 54px;
+    top: -3px;
+    left: -3px;
+  }
+}
