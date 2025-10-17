@@ -1,7 +1,24 @@
 {
-  "name": "cricket-counter-web",
+  "name": "cricket-counter",
+  "author": "Adam Linton <adam@sinewavedesign.com.au>",
+  "homepage": "https://sinewavedesign.com.au/apps/cricket-counter",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adam-linton/cricket-counter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/adam-linton/cricket-counter/issues"
+  },
+  "keywords": [
+    "cricket",
+    "counter",
+    "umpire",
+    "scorecard",
+    "scoreboard"
+  ],
   "version": "1.0.0",
   "description": "A cricket umpire counter app for iPhone 14",
+  "license": "GPL-3.0-or-later",
   "type": "module",
   "scripts": {
     "dev": "vite dev --host 0.0.0.0",

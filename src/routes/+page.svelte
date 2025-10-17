@@ -6,10 +6,9 @@
   let overs = 0;
   let showResetModal = false;
   
+  
   // Undo slider state
   let isDragging = false;
-  let dragStartX = 0;
-  let currentX = 0;
   let holdTimer = null;
   let holdProgress = 0;
   let isHolding = false;
@@ -26,6 +25,7 @@
     loadState();
     initializeWakeLock();
     initializeAudio();
+    registerServiceWorker();
   });
   
   function loadState() {
@@ -97,9 +97,28 @@
     clickSound = playClickSound;
   }
   
+  function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered successfully:', registration);
+        })
+        .catch((error) => {
+          console.log('Service Worker registration failed:', error);
+        });
+    }
+  }
+  
   function vibrate(pattern) {
     if ('vibrate' in navigator) {
-      navigator.vibrate(pattern);
+      try {
+        navigator.vibrate(pattern);
+        console.log('Vibration triggered:', pattern);
+      } catch (error) {
+        console.log('Vibration failed:', error);
+      }
+    } else {
+      console.log('Vibration not supported on this device/browser');
     }
   }
   
@@ -142,35 +161,66 @@
     showResetModal = false;
   }
   
-  // Undo slider handlers
-  function handleSliderStart(event) {
+  // Simple drag handlers
+  let dragStartX = 0;
+  let currentX = 0;
+  
+  function handleMouseDown(event) {
     event.preventDefault();
-    event.stopPropagation();
-    
     isDragging = true;
-    const clientX = event.type === 'mousedown' ? event.clientX : event.touches[0].clientX;
-    dragStartX = clientX;
-    currentX = clientX;
+    dragStartX = event.clientX;
+    currentX = event.clientX;
     
-    // Add global event listeners for better responsiveness
-    document.addEventListener('mousemove', handleSliderMove, { passive: false });
-    document.addEventListener('mouseup', handleSliderEnd, { passive: false });
-    document.addEventListener('touchmove', handleSliderMove, { passive: false });
-    document.addEventListener('touchend', handleSliderEnd, { passive: false });
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   }
   
-  function handleSliderMove(event) {
-    if (!isDragging) return;
-    
+  function handleTouchStart(event) {
     event.preventDefault();
-    event.stopPropagation();
+    isDragging = true;
+    dragStartX = event.touches[0].clientX;
+    currentX = event.touches[0].clientX;
     
-    const clientX = event.type === 'mousemove' ? event.clientX : event.touches[0].clientX;
-    const deltaX = dragStartX - clientX; // Positive when dragging left (undo direction)
+    document.addEventListener('touchmove', handleTouchMove);
+    document.addEventListener('touchend', handleTouchEnd);
+  }
+  
+  function handleMouseMove(event) {
+    if (!isDragging) return;
+    event.preventDefault();
+    currentX = event.clientX;
+    updateDragProgress();
+  }
+  
+  function handleTouchMove(event) {
+    if (!isDragging) return;
+    event.preventDefault();
+    currentX = event.touches[0].clientX;
+    updateDragProgress();
+  }
+  
+  function handleMouseUp(event) {
+    if (!isDragging) return;
+    isDragging = false;
+    resetSlider();
+    
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  }
+  
+  function handleTouchEnd(event) {
+    if (!isDragging) return;
+    isDragging = false;
+    resetSlider();
+    
+    document.removeEventListener('touchmove', handleTouchMove);
+    document.removeEventListener('touchend', handleTouchEnd);
+  }
+  
+  function updateDragProgress() {
+    const deltaX = dragStartX - currentX; // Positive when dragging left
     const sliderWidth = sliderElement ? sliderElement.offsetWidth : 300;
-    const progress = Math.max(0, Math.min(1, deltaX / (sliderWidth * 0.7))); // More sensitive threshold
-    
-    currentX = clientX;
+    const progress = Math.max(0, Math.min(1, deltaX / (sliderWidth * 0.6)));
     
     // If dragged far enough to the left, start hold timer
     if (progress > 0.6 && !isHolding) {
@@ -178,8 +228,8 @@
       holdProgress = 0;
       
       holdTimer = setInterval(() => {
-        holdProgress += 20; // Increment by 20ms for smoother progress
-        if (holdProgress >= 2000) { // 2 seconds
+        holdProgress += 20;
+        if (holdProgress >= 200) { // 2 seconds
           undoBall();
           resetSlider();
         }
@@ -195,12 +245,7 @@
     }
   }
   
-  function handleSliderEnd(event) {
-    if (!isDragging) return;
-    
-    event.preventDefault();
-    event.stopPropagation();
-    
+  function resetSlider() {
     isDragging = false;
     isHolding = false;
     holdProgress = 0;
@@ -209,30 +254,30 @@
       clearInterval(holdTimer);
       holdTimer = null;
     }
-    
-    // Remove global event listeners
-    document.removeEventListener('mousemove', handleSliderMove);
-    document.removeEventListener('mouseup', handleSliderEnd);
-    document.removeEventListener('touchmove', handleSliderMove);
-    document.removeEventListener('touchend', handleSliderEnd);
-    
-    resetSlider();
-  }
-  
-  function resetSlider() {
-    currentX = dragStartX;
-    isDragging = false;
-    isHolding = false;
-    holdProgress = 0;
   }
   
   // Calculate slider position - handle starts on right (6px) and follows finger when dragged
-  $: sliderPosition = isDragging ? Math.max(2, Math.min(248, 6 - (currentX - dragStartX))) : 6;
-  $: holdProgressPercent = isHolding ? (holdProgress / 2000) * 100 : 0;
+  $: sliderPosition = isDragging ? Math.max(2, Math.min(288, 3 + (dragStartX - currentX))) : 3;
+  $: holdProgressPercent = isHolding ? (holdProgress / 200) * 100 : 0;
 </script>
 
 <svelte:head>
   <title>Cricket Counter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content={showResetModal ? '#000000' : '#ffffff'}>
+  <meta name="apple-mobile-web-app-status-bar-style" content={showResetModal ? 'black-translucent' : 'default'}>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-title" content="Cricket Counter">
+  <meta name="application-name" content="Cricket Counter">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-tap-highlight" content="no">
+  
+  <!-- Icons -->
+  <link rel="icon" type="image/png" href="/ball.png">
+  <link rel="apple-touch-icon" href="/ball.png">
 </svelte:head>
 
 <div id="app">
@@ -274,17 +319,20 @@
       aria-label="Undo ball count slider"
       aria-valuenow={isHolding ? holdProgress : 0}
       aria-valuemin="0"
-      aria-valuemax="2000"
+      aria-valuemax="200"
       tabindex="0"
-      on:mousedown={handleSliderStart}
-      on:touchstart={handleSliderStart}
     >
       <div class="undo-track" class:active={isHolding}></div>
-      <div class="undo-label">REMOVE</div>
+      <div class="undo-label">REMOVE DELIVERY</div>
       <div 
         class="undo-handle" 
         class:dragging={isDragging}
+        role="button"
+        tabindex="0"
+        aria-label="Drag to remove last ball"
         style="right: {sliderPosition}px;"
+        on:mousedown={handleMouseDown}
+        on:touchstart={handleTouchStart}
       >
         <div class="undo-handle-icon">‹</div>
         <div 
